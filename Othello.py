@@ -1,3 +1,4 @@
+import sys
 class Othello:
     DEFAULT_BOARD = "---------------------------xo------ox---------------------------"
     DEFAULT_PLAY = "x"
@@ -24,6 +25,7 @@ class Othello:
         else:
             self.origDepth = origDepth
         self.origBoard = []
+        self.moves = []
         self.parentCoord = parentCoord
         self.board = []
         self.play = play
@@ -97,14 +99,13 @@ class Othello:
                 
     def getPossiblePlays(self):
         """ Returns the possible move coordinates. """
-        other = self.other
         possibleMoves = set()
         for y in xrange(8):
             for x in xrange(8):
-                if self.board[y][x] == other:
+                if self.board[y][x] == self.other:
                     possibleMoves |= (self.getNeighbors((x, y), checkOccupied=True))
+    
         return filter(lambda k: self.isValidPlay(k), possibleMoves)
-                    
                 
     def isValidPlay(self, coor):
         """ Returns whether the move is a valid one. """
@@ -112,60 +113,63 @@ class Othello:
         x, y = coor
         # Right, left, up, down, y = x left, y = x rigth, y = -x below, y = -x above
         otherFound = [False] * 8
-        if self.depth == 3 and coor == (4, 2):
-            print 1
+        
         #Right
-        for x1 in xrange(x + 1, 8):
-            if self.board[y][x1] == other:
-                otherFound[0] = True
-            elif self.board[y][x1] == self.play:
-                if otherFound[0]:
-                    return True
+        if x < 7 and self.board[y][x + 1] == self.other:
+            for x1 in xrange(x + 1, 8):
+                if self.board[y][x1] == other:
+                    otherFound[0] = True
+                elif self.board[y][x1] == self.play:
+                    if otherFound[0]:
+                        return True
+                    else:
+                        break
                 else:
                     break
-            else:
-                break
     
-        #Left        
-        for x1 in xrange(x - 1, -1, -1):
-    
-            if self.board[y][x1] == other:
-                otherFound[1] = True
-            elif self.board[y][x1] == self.play:
-                if otherFound[1]:
-                    return True
-                else:
-                    break        
-            else:
-                break    
-    
-        #Up
-        for y1 in xrange(y - 1, -1, -1):
-            if self.board[y1][x] == other:
-                otherFound[2] = True
-            elif self.board[y1][x] == self.play:
-                if otherFound[2]:
-                    return True
-                else:
-                    break
-            else:
-                break            
-        #Down
-        for y1 in xrange(y + 1, 8):
-            if self.board[y1][x] == other:
-                otherFound[3] = True
-            elif self.board[y1][x] == self.play:
-                if otherFound[3]:
-                    return True
+        #Left    
+        if x > 0 and self.board[y][x - 1] == self.other:
+            for x1 in xrange(x - 1, -1, -1):
+                if self.board[y][x1] == other:
+                    otherFound[1] = True
+                elif self.board[y][x1] == self.play:
+                    if otherFound[1]:
+                        return True
+                    else:
+                        break        
                 else:
                     break    
-            else:
-                break                  
-        #Y = x right   8 - max(x, y) - 1, 0, -1
-        for inc in xrange(0, 8 - max(x, y) - 1):
+    
+        #Up
+        if y > 0 and self.board[y - 1][x] == self.other:
+            for y1 in xrange(y - 1, -1, -1):
+                if self.board[y1][x] == other:
+                    otherFound[2] = True
+                elif self.board[y1][x] == self.play:
+                    if otherFound[2]:
+                        return True
+                    else:
+                        break
+                else:
+                    break            
+            
+        #Down
+        if y < 7 and self.board[y + 1][x] == self.other:
+            for y1 in xrange(y + 1, 8):
+                if self.board[y1][x] == other:
+                    otherFound[3] = True
+                elif self.board[y1][x] == self.play:
+                    if otherFound[3]:
+                        return True
+                    else:
+                        break    
+                else:
+                    break                  
+        #Y = x right   
+        for inc in xrange(1, 8 - max(x, y) - 1):
             if self.board[y - inc][x + inc] == other:
                 otherFound[4] = True
-            elif self.board[y][x1] == self.play:
+            elif self.board[y - inc][x + inc] == self.play:
                 if otherFound[4]:
                     return True
                 else:
@@ -176,7 +180,7 @@ class Othello:
         for inc in xrange(0, min(x, y)):
             if self.board[y + inc][x - inc] == other:
                 otherFound[5] = True
-            elif self.board[y][x1] == self.play:
+            elif self.board[y + inc][x - inc] == self.play:
                 if otherFound[5]:
                     return True
                 else:
@@ -187,7 +191,7 @@ class Othello:
         for inc in xrange(0, min(x, y)):
             if self.board[y - inc][x - inc] == other:
                 otherFound[6] = True
-            elif self.board[y][x1] == self.play:
+            elif self.board[y - inc][x - inc] == self.play:
                 if otherFound[6]:
                     return True
                 else:
@@ -195,10 +199,10 @@ class Othello:
             else:
                 break            
         #Y = -x right
-        for inc in xrange(0, 8 - max(x, y) - 1):
+        for inc in xrange(1, 8 - max(x, y) - 1):
             if self.board[y + inc][x + inc] == other:
                 otherFound[7] = True
-            elif self.board[y][x1] == self.play:
+            elif self.board[y + inc][x + inc] == self.play:
                 if otherFound[7]:
                     return True
                 else:
@@ -213,11 +217,12 @@ class Othello:
         self.board[y][x] = self.play
         otherFound = [False] * 8
         terminatorFound = [False] * 8
+        #Check if change
         #Right
         for x1 in xrange(x + 1, 8):
             if self.board[y][x1] == other:
                 otherFound[0] = True
-            elif self.board[y][x1] == self.play and otherFound[0] :
+            elif self.board[y][x1] == self.play and otherFound[0]:
                 terminatorFound[0] = True
                 break
             else:
@@ -249,44 +254,47 @@ class Othello:
                 break  
             else:
                 break            
-        #Y = x above
-        for inc in xrange(0, 8 - max(x, y)):
-            if self.board[y + inc][x + inc] == other:
+        #Y = x right   
+        for inc in xrange(1, 8 - max(x, y) - 1):
+            if self.board[y - inc][x + inc] == other:
                 otherFound[4] = True
-            elif self.board[y][x1] == self.play and otherFound[4]:
+            elif self.board[y - inc][x + inc] == self.play and otherFound[4]:
                 terminatorFound[4] = True
-                break  
-            else:
-                break            
-        #Y = x below
-        for inc in xrange(8 - max(x, y) - 1, -1, -1):
-            if self.board[y + inc][x + inc] == other:
-                otherFound[5] = True
-            elif self.board[y][x1] == self.play and otherFound[5]:
-                terminatorFound[5] = True
                 break   
             else:
                 break            
-        #Y = - x above
-        for inc in xrange(0, 8 - max(x, y)):
+        #Y = x left
+        for inc in xrange(0, min(x, y)):
+            if self.board[y + inc][x - inc] == other:
+                otherFound[5] = True
+            elif self.board[y + inc][x - inc] == self.play and otherFound[6]:
+                terminatorFound[6] = True
+                break   
+            else:
+                break            
+        #Y = -x left
+        for inc in xrange(0, min(x, y)):
             if self.board[y - inc][x - inc] == other:
                 otherFound[6] = True
-            elif self.board[y][x1] == self.play and otherFound[6]:
+            elif self.board[y - inc][x - inc] == self.play and otherFound[6]:
                 terminatorFound[6] = True
-                break
+                break   
             else:
                 break            
-        #Y = - x below
-        for inc in xrange(8 - max(x, y) - 1, -1, -1):
-            if self.board[y - inc][x - inc] == other:
+        #Y = -x right
+        for inc in xrange(1, 8 - max(x, y) - 1):
+            if self.board[y + inc][x + inc] == other:
                 otherFound[7] = True
-            elif self.board[y][x1] == self.play and otherFound[7]:
+            elif self.board[y + inc][x + inc] == self.play and otherFound[7]:
                 terminatorFound[7] = True
-                break  
+                break 
             else:
                 break            
+           
     
     
+        
+        #Flip
         #Right
         if terminatorFound[0]:
             for x1 in xrange(x + 1, 8):
@@ -315,53 +323,50 @@ class Othello:
                     self.board[y1][x] = self.play
                 elif self.board[y1][x] == self.play:
                     break      
-        #Y = x above
+        #Y = x right
         if terminatorFound[4]:
-            for inc in xrange(0, 8 - max(x, y)):
-                if self.board[y + inc][x + inc] == other:
-                    self.board[y + inc][x + inc] = self.play
-                elif self.board[y][x1] == self.play:
+            for inc in xrange(1, 8 - max(x, y) - 1):
+                if self.board[y - inc][x + inc] == other:
+                    self.board[y - inc][x + inc] = self.play
+                elif self.board[y - inc][x + inc] == self.play:
                     break    
-        #Y = x below
+        #Y = x left
         if terminatorFound[5]:
-            for inc in xrange(8 - max(x, y) - 1, -1, -1):
+            for inc in xrange(0, min(x, y)):
+                if self.board[y + inc][x - inc] == other:
+                    self.board[y + inc][x - inc] = self.play
+                elif self.board[y + inc][x - inc] == self.play:
+                    break           
+        #Y = x left
+        if terminatorFound[6]:
+            for inc in xrange(0, min(x, y)):
+                if self.board[y - inc][x - inc] == other:
+                    self.board[y - inc][x - inc] = self.play
+                elif self.board[y - inc][x - inc] == self.play:
+                    break    
+        #Y = x right
+        if terminatorFound[7]:
+            for inc in xrange(1, 8 - max(x, y) - 1):
                 if self.board[y + inc][x + inc] == other:
                     self.board[y + inc][x + inc] = self.play
-                elif self.board[y][x1] == self.play:
-                    break           
-        #Y = x above
-        if terminatorFound[6]:
-            for inc in xrange(0, 8 - max(x, y)):
-                if self.board[y - inc][x - inc] == other:
-                    self.board[y - inc][x - inc] = self.play
-                elif self.board[y][x1] == self.play:
-                    break    
-        #Y = x below
-        if terminatorFound[7]:
-            for inc in xrange(8 - max(x, y) - 1, -1, -1):
-                if self.board[y - inc][x - inc] == other:
-                    self.board[y - inc][x - inc] = self.play
-                elif self.board[y][x1] == self.play:
+                elif self.board[y + inc][x + inc] == self.play:
                     break     
     def playGame(self, turns):
+        """ Sets the AI against itself. """
         self.printBoard()
     
         for i in xrange(turns):
             self.playMove(self.bestMove["coord"])
+            print self.bestMove["coord"], self.play
             self.origBoard = [row[:] for row in self.board]
             self.printBoard()
-            
-            self.getBestMove()
             self.play, self.other = self.other, self.play
+            self.getBestMove()
+            
 def main():
+    #action=?? outputfile=?? result_prefix=?? ply=?? play=?? board=?? cputime=??
     othellogame = Othello(depth=2)
-    #othellogame.playGame(5)
-    otherGame = Othello(depth=2)
-    otherGame.children[0].printBoard()
-    print "parent^"
-    for child in otherGame.children[0].children:
-        child.printBoard()
-    #othellogame.printTree()
-    t = 2
+    othellogame.playGame(50)
+
 if __name__ == "__main__":
     main()
