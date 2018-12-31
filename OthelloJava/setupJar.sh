@@ -1,0 +1,1 @@
+javac -d target/bin src/main/java/*.java
