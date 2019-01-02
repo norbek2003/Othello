@@ -23,18 +23,15 @@ public class OthelloGame {
         for(int j = 0; j < 8; j++) {
             int i = 7 - j;// 7 - j;
             String[] temp = board.substring(i * 8, (i + 1) * 8).split("");
-            //System.out.println(board.substring(i * 8, (i + 1) * 8) + " " + i + " " + j);
             for(int k = 0; k < 8; k ++){
                 this.board[j][k] = temp[k];
                 this.origBoard[j][k] = temp[k];
             }
-            //this.origBoard[i] = board.substring(i * 8, (i + 1) * 8).split("");
-            //this.board[i] = board.substring(i * 8, (i + 1) * 8).split("");
-            //System.out.println(board.substring(i * 8, (i + 1) * 8) + " " + i + " " + j);
+
         }
         this.depth = depth;
         if(orig){
-            this.depth *= 2;
+        //    this.depth *= 2;
         }
         this.play = play;;
         this.other = MOVES.replace(play, "");
@@ -46,14 +43,15 @@ public class OthelloGame {
         this.scores.put("o", oCount);
         this.bestMove.put("coord", parentCoord);
         this.bestMove.put("scores", scores);
-        System.out.println(depth + " " + play);
-        printBoard();
+        //System.out.println(depth + " " + play);
+        //printBoard();
         getBestMove();
-        //System.out.println(getPossiblePlays());
 
     }
     public static void main(String[] args) {
-        OthelloGame o = new OthelloGame(3);//"default", "default", 0, true, null);
+        //Max is 7
+        OthelloGame o = new OthelloGame(4);//"default", "default", 0, true, null);
+        o.playGame(100);
     }
     public static String stringifyBoard(String[][] board) {
         String str = "";
@@ -62,7 +60,7 @@ public class OthelloGame {
         }
         return str;
     }
-    private String[][] matrixCopy(String[][] a) {
+    public String[][] matrixCopy(String[][] a) {
         String[][] d = new String[8][8];
         for(int i = 0; i < 8; i++) {
             for(int k = 0; k < 8; k++) {
@@ -101,11 +99,11 @@ public class OthelloGame {
     }
     public void printBoard() {
         for(int i = 0; i < 8; i++) {
-            System.out.println(Arrays.toString(board[i]).replace(", ", " ").replace("[", "").replace("]", "") + " " + i);
+            System.out.println(Arrays.toString(board[i]).replace(", ", " ").replace("[", "").replace("]", ""));
         }
         System.out.println("\n");
     }
-    private boolean isValidPlay(Coordinate coord) {
+    public boolean isValidPlay(Coordinate coord) {
         int x = coord.x;
         int y = coord.y;
         boolean[] otherFound = {false, false, false, false, false, false, false, false};
@@ -153,19 +151,19 @@ public class OthelloGame {
             }
         }
         //Y = x right
-        if(y > 0 && x < 7 && Math.max(x, y) > 1) {
-            for (int inc = 1; inc < 8 - Math.max(x, y) - 1; inc++) {
-                System.out.println(coord + " " + (y - inc) + " " + (x + inc) + " " + Math.max(x, y));
-                if (board[y - inc][x + inc].equals(other)) {
-                    otherFound[4] = true;
-                } else if (board[y - inc][x + inc].equals(play) && otherFound[4]) {
-                    return true;
-                } else break;
-            }
+        //new PythonRange(1, 8 - Math.max(x, y) - 1)
+        for(int inc : new PythonRange(1, Math.min(8 - x, y))){
+
+            if (board[y - inc][x + inc].equals(other)) {
+                otherFound[4] = true;
+            } else if (board[y - inc][x + inc].equals(play) && otherFound[4]) {
+                return true;
+            } else break;
         }
 
+
         //Y = x left
-        for(int inc = 0; inc < Math.min(x, y); inc++) {//(inc in xrange(0, Math.min(x, y))) {
+        for(int inc : new PythonRange(Math.min(x, y))) {//(inc in xrange(0, Math.min(x, y))) {
             if(board[y + inc][x - inc].equals(other)) {
                 otherFound[5] = true;
             } else if(board[y + inc][x - inc].equals(play) && otherFound[5]) {
@@ -173,7 +171,7 @@ public class OthelloGame {
             } else break;
         }
         //Y = -x left
-        for(int inc = 0; inc < Math.min(x, y); inc++) {
+        for(int inc : new PythonRange(Math.min(x, y))) {
             if(board[y - inc][x - inc].equals(other)) {
                 otherFound[6] = true;
             } else if(board[y - inc][x - inc].equals(play) && otherFound[6]) {
@@ -181,7 +179,7 @@ public class OthelloGame {
             } else break;
         }
         //Y = -x right
-        for(int inc = 1; inc < 8 - Math.max(x, y) - 1; inc++) {
+        for(int inc : new PythonRange(1, 8 - Math.max(x, y) - 1)){
             if(board[y + inc][x + inc].equals(other)) {
                 otherFound[7] = true;
             } else if(board[y + inc][x + inc].equals(play) && otherFound[7]) {
@@ -190,7 +188,7 @@ public class OthelloGame {
         }
         return false;
     }
-    private void getBestMove() {
+    public void getBestMove() {
         children = new ArrayList<OthelloGame>();
         if(depth > 0) {
             for(Coordinate coord : getPossiblePlays()) {
@@ -213,8 +211,10 @@ public class OthelloGame {
             }
         }
     }
+    public void playMove(){
+        playMove((Coordinate) bestMove.get("coord"));
+    }
     public void playMove(Coordinate coord) {
-
         int x = coord.x;
         int y = coord.y;
         board[y][x] = play;;
@@ -267,7 +267,7 @@ public class OthelloGame {
         }
         //Y = x right
         if(y > 0 && x < 7) {
-            for (int inc = 1; inc < 8 - Math.max(x, y) - 1; inc++) {//(inc in xrange(1, 8 - Math.max(x, y) - 1)) {
+            for (int inc : new PythonRange(1, Math.min(8 - x, y))) {//(inc in xrange(1, 8 - Math.max(x, y) - 1)) {
                 if (board[y - inc][x + inc].equals(other)) {
                     otherFound[4] = true;
                 } else if (board[y - inc][x + inc].equals(play) && otherFound[4]) {
@@ -277,7 +277,7 @@ public class OthelloGame {
             }
         }
         //Y = x left
-        for(int inc = 0; inc < Math.min(x, y); inc++) {//(inc in xrange(0, Math.min(x, y))) {
+        for(int inc : new PythonRange(Math.min(x, y))) {//(inc in xrange(0, Math.min(x, y))) {
             if(board[y + inc][x - inc].equals(other)) {
                 otherFound[5] = true;
             } else if(board[y + inc][x - inc].equals(play) && otherFound[5]) {
@@ -286,7 +286,7 @@ public class OthelloGame {
             } else break;
         }
         //Y = -x left
-        for(int inc = 0; inc < Math.min(x, y); inc++) {
+        for(int inc : new PythonRange(Math.min(x, y))) {
             if(board[y - inc][x - inc].equals(other)) {
                 otherFound[6] = true;
             } else if(board[y - inc][x - inc].equals(play) && otherFound[6]) {
@@ -295,7 +295,7 @@ public class OthelloGame {
             } else break;
         }
         //Y = -x right
-        for(int inc = 1; inc < 8 - Math.max(x, y) - 1; inc++) {
+        for(int inc : new PythonRange(1, 8 - Math.max(x, y) - 1)) {
             if(board[y + inc][x + inc].equals(other)) {
                 otherFound[7] = true;
             } else if(board[y + inc][x + inc].equals(play) && otherFound[7]) {
@@ -350,7 +350,7 @@ public class OthelloGame {
         }
         //Y = x right
         if(terminatorFound[4]) {
-            for(int inc = 1; inc < 8 - Math.max(x, y) - 1; inc++) {
+            for(int inc : new PythonRange(1, Math.min(8 - x, y))) {
                 if(board[y - inc][x + inc].equals(other)) {
                     board[y - inc][x + inc] = play;
                 } else if(board[y - inc][x + inc].equals(play)) {
@@ -360,7 +360,7 @@ public class OthelloGame {
         }
         //Y = x left
         if(terminatorFound[5]) {
-            for(int inc = 0; inc < Math.min(x, y); inc++) {
+            for(int inc : new PythonRange(Math.min(x, y))) {
                 if(board[y + inc][x - inc].equals(other)) {
                     board[y + inc][x - inc] = play;
                 } else if(board[y + inc][x - inc].equals(play)) {
@@ -370,7 +370,7 @@ public class OthelloGame {
         }
         //Y = x left
         if(terminatorFound[6]) {
-            for(int inc = 0; inc < Math.min(x, y); inc++) {
+            for(int inc : new PythonRange(Math.min(x, y))) {
                 if(board[y - inc][x - inc].equals(other)) {
                     board[y - inc][x - inc] = play;
                 } else if(board[y - inc][x - inc].equals(play)) {
@@ -380,7 +380,7 @@ public class OthelloGame {
         }
         //Y = x right
         if(terminatorFound[7]) {
-            for(int inc = 1; inc < 8 - Math.max(x, y) - 1; inc++) {
+            for(int inc : new PythonRange(1, Math.min(8 - x, y))) {
                 if(board[y + inc][x + inc].equals(other)) {
                     board[y + inc][x + inc] = play;
                 } else if(board[y + inc][x + inc].equals(play)) {
@@ -388,8 +388,7 @@ public class OthelloGame {
                 }
             }
         }
-        //System.out.println(coord);
-        //printBoard();
+
     }
     enum myComparatorA implements Comparator<OthelloGame> {
         INSTANCE;
@@ -405,6 +404,25 @@ public class OthelloGame {
         public int compare(OthelloGame a, OthelloGame b) {
             return ((HashMap<String, Integer>) a.bestMove.get("scores")).get(a.other) - ((HashMap<String, Integer>) b.bestMove.get("scores")).get(b.other);
         }
+    }
+    public void playGame(int length){
+        printBoard();
+        for(int i = 0; i < length; i++){
+            System.out.println(bestMove.get("coord") + " " + play);
+            playMove((Coordinate) bestMove.get("coord"));
+            origBoard = matrixCopy(board);
+            printBoard();
+            String temp = play;
+            play = other;
+            other = temp;
+            getBestMove();
+            if(stringifyBoard(board).replace("-", "").length() == 64){
+                break;
+            }
+        }
+    }
+    public String[][] getBoard(){
+        return board;
     }
 }
 
