@@ -168,7 +168,7 @@ public class OthelloGame {
 
 
         //Y = x left
-        for(int inc : new PythonRange(Math.min(x, y))) {//(inc in xrange(0, Math.min(x, y))) {
+        for(int inc : new PythonRange(1, Math.min(8 - y, x))) {//(inc in xrange(0, Math.min(x, y))) {
             if(board[y + inc][x - inc].equals(other)) {
                 otherFound[5] = true;
             } else if(board[y + inc][x - inc].equals(play) && otherFound[5]) {
@@ -176,7 +176,7 @@ public class OthelloGame {
             } else break;
         }
         //Y = -x left
-        for(int inc : new PythonRange(Math.min(x, y))) {
+        for(int inc : new PythonRange(1, Math.min(x, y))) {
             if(board[y - inc][x - inc].equals(other)) {
                 otherFound[6] = true;
             } else if(board[y - inc][x - inc].equals(play) && otherFound[6]) {
@@ -284,7 +284,7 @@ public class OthelloGame {
             }
         }
         //Y = x left
-        for(int inc : new PythonRange(Math.min(x, y))) {//(inc in xrange(0, Math.min(x, y))) {
+        for(int inc : new PythonRange(1, Math.min(8 - y, x))) {//(inc in xrange(0, Math.min(x, y))) {
             if(board[y + inc][x - inc].equals(other)) {
                 otherFound[5] = true;
             } else if(board[y + inc][x - inc].equals(play) && otherFound[5]) {
@@ -293,7 +293,7 @@ public class OthelloGame {
             } else break;
         }
         //Y = -x left
-        for(int inc : new PythonRange(Math.min(x, y))) {
+        for(int inc : new PythonRange(1, Math.min(x, y))) {
             if(board[y - inc][x - inc].equals(other)) {
                 otherFound[6] = true;
             } else if(board[y - inc][x - inc].equals(play) && otherFound[6]) {
@@ -367,7 +367,7 @@ public class OthelloGame {
         }
         //Y = x left
         if(terminatorFound[5]) {
-            for(int inc : new PythonRange(Math.min(x, y))) {
+            for(int inc : new PythonRange(1, Math.min(x, 8 - y))) {
                 if(board[y + inc][x - inc].equals(other)) {
                     board[y + inc][x - inc] = play;
                 } else if(board[y + inc][x - inc].equals(play)) {
@@ -377,7 +377,7 @@ public class OthelloGame {
         }
         //Y = x left
         if(terminatorFound[6]) {
-            for(int inc : new PythonRange(Math.min(x, y))) {
+            for(int inc : new PythonRange(1, Math.min(x, y))) {
                 if(board[y - inc][x - inc].equals(other)) {
                     board[y - inc][x - inc] = play;
                 } else if(board[y - inc][x - inc].equals(play)) {
@@ -442,6 +442,9 @@ public class OthelloGame {
     }
     public String[][] getOrigBoard(){
         return origBoard;
+    }
+    public boolean isMovePossible(){
+	return (getPossiblePlays().size() != 0);
     }
 }
 

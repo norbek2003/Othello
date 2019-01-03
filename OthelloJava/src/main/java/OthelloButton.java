@@ -48,8 +48,10 @@ public class OthelloButton extends JButton implements ActionListener{
     }
     /**Deals with button press. */
     public void actionPerformed(ActionEvent e) {
-        pressed = !pressed;
-        parent.press(this);
+	if(owner == "-"){
+	    pressed = !pressed;
+	    parent.press(this);
+	}
     }
     /** Creates the borders based on position. */
     public void setBorders(){
