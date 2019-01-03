@@ -52,23 +52,35 @@ public class Othello{
     /** Deals with the pressing of the buttons on the Othello grid. */
     public void press(OthelloButton b){
         if(game.isValidPlay(b.coord)) {
-
+            myBoard = game.matrixCopy(game.getBoard());
             System.out.println("Pressed");
-            game.playMove(b.coord);
+            game.playMove(b.coord, true);
             game.printBoard();
+            game.printOrigBoard();
             updateBoard();
             System.out.println("Updated");
             game.play = "o";
             game.other = "x";
             game.getBestMove();
-            System.out.println("Thought of retaliation");
-            game.playMove();
-            System.out.println("Retaliated");
-            game.printBoard();
-            updateBoard();
-            System.out.println("Updated");
-            game.play = "x";
-            game.other = "o";
+            javax.swing.Timer timer = new javax.swing.Timer(3000, new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent arg0) {
+                    System.out.println("Last");
+                    game.printBoard();
+                    System.out.println("Thought of retaliation");
+                    game.playMove();
+                    System.out.println("Retaliated");
+                    game.printBoard();
+                    updateBoard();
+                    System.out.println("Updated");
+                    game.play = "x";
+                    game.other = "o";
+                }
+            });
+            timer.setRepeats(false);
+            timer.start();
+
 
         }
 
@@ -102,15 +114,14 @@ public class Othello{
 
         c.weightx = 0;
         c.anchor = GridBagConstraints.NORTHEAST;
-
-   //     gridContainer.add(pauseButton, c);
         gridContainer.setPreferredSize(new Dimension(700, 700));
     }
     private void updateBoard(){
         String[][] board = game.getBoard();
         for(int y = 0; y < 8; y++){
             for(int x = 0; x < 8; x++){
-                if(board[y][x] != myBoard[y][x]) {
+                if(!board[y][x].equals(grid[y][x].getOwner())) {
+                    System.out.println(x + " " + y);
                     //Checking for change saves a lot of time repaint GUI;
                     grid[y][x].flipToColor(board[y][x]);
                 }

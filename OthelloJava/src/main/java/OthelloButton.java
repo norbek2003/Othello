@@ -11,15 +11,13 @@ public class OthelloButton extends JButton implements ActionListener{
     public Coordinate coord;
     public boolean pressed;
     public Othello parent;
-    private boolean valueIsSet = false;
-    private HashSet<String> numStrings = new HashSet<String>(Arrays.asList(new String [] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"}));
-    private HashSet<String> directions = new HashSet<String>(Arrays.asList(new String [] {"Left", "Right", "Up", "Down"}));
+
     private HashMap<String, Color> colors = new HashMap<String, Color>(){{
         put("x", Color.BLACK);
         put("o", Color.WHITE);
-        put("orig", new Color(50, 100, 10));
+        put("-", new Color(50, 100, 10));
     }};
-    private String owner = "orig";
+    private String owner = "-";
     public JLabel possibleValues = new JLabel("", JLabel.CENTER);
     public Graphics g;
     public OthelloButton(Coordinate coord, Othello parent){
@@ -50,10 +48,8 @@ public class OthelloButton extends JButton implements ActionListener{
     }
     /**Deals with button press. */
     public void actionPerformed(ActionEvent e) {
-        if(!valueIsSet){
-            pressed = !pressed;
-            parent.press(this);
-        }
+        pressed = !pressed;
+        parent.press(this);
     }
     /** Creates the borders based on position. */
     public void setBorders(){
@@ -65,18 +61,7 @@ public class OthelloButton extends JButton implements ActionListener{
         setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, Color.black));
     }
     /** Marks it as a permanent unclickable value. */
-    public void permanent(){
-        valueIsSet = true;
-        possibleValues.setText("");
-        setFont(new Font("Arial", Font.BOLD, 30));
-    }
-    public boolean isPermanent(){
-        return valueIsSet;
-    }
-    public void sc(Color c){
-        g.setColor(c);
-        super.paintComponent(g);
-    }
+
     protected void paintComponent(Graphics g) {
         g.setColor(colors.get(owner));
         g.fillOval(0, 0, getSize().width-1,getSize().height-1);
@@ -88,7 +73,6 @@ public class OthelloButton extends JButton implements ActionListener{
         g.setColor(colors.get(owner));
         g.drawOval(0, 0, getSize().width-1, getSize().height-1);
     }
-
     Shape shape;
     public boolean contains(int x, int y) {
         if (shape == null ||
@@ -100,8 +84,11 @@ public class OthelloButton extends JButton implements ActionListener{
     public void flipToColor(String c){
         if(!c.equals("-")) {
             owner = c;
-            revalidate();
+            repaint();
+            //paintComponent();
         }
     }
-
+    public String getOwner(){
+        return owner;
+    }
 }

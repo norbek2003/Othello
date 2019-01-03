@@ -66,7 +66,6 @@ public class OthelloGame {
             for(int k = 0; k < 8; k++) {
                 d[i][k] = a[i][k];
             }
-            //d[i] = a[i];
         }
         return d;
     }
@@ -100,6 +99,12 @@ public class OthelloGame {
     public void printBoard() {
         for(int i = 0; i < 8; i++) {
             System.out.println(Arrays.toString(board[i]).replace(", ", " ").replace("[", "").replace("]", ""));
+        }
+        System.out.println("\n");
+    }
+    public void printOrigBoard(){
+        for(int i = 0; i < 8; i++) {
+            System.out.println(Arrays.toString(origBoard[i]).replace(", ", " ").replace("[", "").replace("]", ""));
         }
         System.out.println("\n");
     }
@@ -213,8 +218,10 @@ public class OthelloGame {
     }
     public void playMove(){
         playMove((Coordinate) bestMove.get("coord"));
+        origBoard = matrixCopy(board);
+        board = matrixCopy(origBoard);
     }
-    public void playMove(Coordinate coord) {
+    public void playMove(Coordinate coord, boolean player) {
         int x = coord.x;
         int y = coord.y;
         board[y][x] = play;;
@@ -388,7 +395,16 @@ public class OthelloGame {
                 }
             }
         }
-
+        //origBoard = matrixCopy(board);
+        if(orig){
+            System.out.println(Arrays.toString(terminatorFound));
+        }
+        if(player){
+            origBoard = matrixCopy(board);
+        }
+    }
+    public void playMove(Coordinate coord){
+        playMove(coord, false);
     }
     enum myComparatorA implements Comparator<OthelloGame> {
         INSTANCE;
@@ -423,6 +439,9 @@ public class OthelloGame {
     }
     public String[][] getBoard(){
         return board;
+    }
+    public String[][] getOrigBoard(){
+        return origBoard;
     }
 }
 
