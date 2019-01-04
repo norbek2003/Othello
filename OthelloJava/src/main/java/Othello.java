@@ -101,13 +101,20 @@ public class Othello{
         c.gridy = 0;
         c.anchor = GridBagConstraints.CENTER;
         gridContainer.add(gridPanel, c);
+        c.gridy = 0;
+        c.weightx = 2;
 
-        c.weightx = 0;
+        Box box = Box.createHorizontalBox();
+        c.anchor = GridBagConstraints.NORTH;
+        box.add(xScore);
+        box.add(oScore);
+        gridContainer.add(box, c);
+        /*
         c.anchor = GridBagConstraints.NORTHEAST;
         gridContainer.add(oScore, c);
         c.anchor = GridBagConstraints.NORTHWEST;
         gridContainer.add(xScore, c);
-
+        */
         gridContainer.setPreferredSize(new Dimension(700, 700));
     }
     private void updateBoard(){
@@ -125,7 +132,14 @@ public class Othello{
         xScore.setText(" " + game.getScore("x") + " ");
     }
     private JLabel scoreDisplayer(String side){
-        JLabel label = new JLabel(" 2 ");
+        JLabel label = new JLabel(" 2 "){
+            @Override
+            public Dimension getMaximumSize() {
+                Dimension d = super.getMaximumSize();
+                d.width = Integer.MAX_VALUE;
+                return d;
+            }
+        };
         label.setFont(new Font("Arial", Font.BOLD, 30));
         label.setBackground(Color.BLACK);
         label.setForeground(Color.WHITE);
@@ -134,6 +148,7 @@ public class Othello{
             label.setForeground(Color.BLACK);
         }
         label.setOpaque(true);
+
         return label;
     }
 }
