@@ -1,26 +1,20 @@
-import java.util.*;
-import java.util.concurrent.*;
-import java.io.*;
 import javax.swing.*;
-import javax.swing.filechooser.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
 public class Othello{
     private JFrame frame = new JFrame();
     private JSplitPane splitPane;
     //Deals with the grid
     private JPanel gridPanel = new JPanel();
     private JPanel gridContainer = new JPanel();
-    private HashMap<Coordinate, OthelloButton> gridButtons = new HashMap<Coordinate, OthelloButton>();
-    private OthelloButton currentGridButton = null;
     private boolean pressable = false;
     private OthelloButton[][] grid = new OthelloButton[8][8];
-    private String[][] myBoard = new String[8][8];
     //Control Panel
     private JPanel controlSuper = new JPanel();
     private JPanel control = new JPanel();
+    private JLabel xScore = scoreDisplayer("x");
+    private JLabel oScore = scoreDisplayer("o");
+
     //Othello Games
     private OthelloGame game;
     public Othello(){
@@ -46,13 +40,12 @@ public class Othello{
         frame.pack();
         frame.setVisible(true);
     }
-    public static void main(String args[]){
+    public static void main(String[] args){
         Othello s = new Othello();
     }
     /** Deals with the pressing of the buttons on the Othello grid. */
     public void press(OthelloButton b){
         if(game.isValidPlay(b.coord)) {
-            myBoard = game.matrixCopy(game.getBoard());
             System.out.println("Pressed");
             game.playMove(b.coord, true);
             game.printBoard();
@@ -95,12 +88,9 @@ public class Othello{
                 OthelloButton b = new OthelloButton(new Coordinate(x, y),this);
                 grid[y][x] = b;
                 gridPanel.add(b);
-                gridButtons.put(b.coord, b);
-
             }
         }
         updateBoard();
-        myBoard = game.matrixCopy(game.getBoard());
         gridPanel.setBorder(BorderFactory.createMatteBorder(5, 5, 5, 5, Color.blue));
         gridPanel.setPreferredSize(new Dimension(500, 500));
         gridContainer.setLayout(new GridBagLayout());
@@ -114,6 +104,10 @@ public class Othello{
 
         c.weightx = 0;
         c.anchor = GridBagConstraints.NORTHEAST;
+        gridContainer.add(oScore, c);
+        c.anchor = GridBagConstraints.NORTHWEST;
+        gridContainer.add(xScore, c);
+
         gridContainer.setPreferredSize(new Dimension(700, 700));
     }
     private void updateBoard(){
@@ -127,9 +121,21 @@ public class Othello{
                 }
             }
         }
-        myBoard = game.matrixCopy(board);
+        oScore.setText(" " + game.getScore("o") + " ");
+        xScore.setText(" " + game.getScore("x") + " ");
     }
-
+    private JLabel scoreDisplayer(String side){
+        JLabel label = new JLabel(" 2 ");
+        label.setFont(new Font("Arial", Font.BOLD, 30));
+        label.setBackground(Color.BLACK);
+        label.setForeground(Color.WHITE);
+        if(side.equals("x")){
+            label.setBackground(Color.WHITE);
+            label.setForeground(Color.BLACK);
+        }
+        label.setOpaque(true);
+        return label;
+    }
 }
 
 

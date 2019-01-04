@@ -1,11 +1,8 @@
 import java.util.*;
-import java.io.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.*;
 import java.awt.geom.*;
-import javax.swing.*;
 
 public class OthelloButton extends JButton implements ActionListener{
     public Coordinate coord;
@@ -18,8 +15,7 @@ public class OthelloButton extends JButton implements ActionListener{
         put("-", new Color(50, 100, 10));
     }};
     private String owner = "-";
-    public JLabel possibleValues = new JLabel("", JLabel.CENTER);
-    public Graphics g;
+    //public Graphics g;
     public OthelloButton(Coordinate coord, Othello parent){
         super("");//coord.toString());
         Dimension size = getPreferredSize();
@@ -34,8 +30,8 @@ public class OthelloButton extends JButton implements ActionListener{
         addActionListener(this);
         setFont(new Font("Arial", Font.PLAIN, 30));
         //setBackground(Color.cyan);
-        possibleValues.setAlignmentX(JLabel.CENTER_ALIGNMENT);
-        add(possibleValues);
+        //possibleValues.setAlignmentX(JLabel.CENTER_ALIGNMENT);
+        //add(possibleValues);
         //setBorder(new RoundedBorder(10));
         this.addKeyListener(new KeyAdapter (){
             public void keyPressed(KeyEvent e) {
@@ -71,11 +67,11 @@ public class OthelloButton extends JButton implements ActionListener{
         super.paintComponent(g);
     }
     protected void paintBorder(Graphics g) {
-        this.g = g;
+        //this.g = g;
         g.setColor(colors.get(owner));
         g.drawOval(0, 0, getSize().width-1, getSize().height-1);
     }
-    Shape shape;
+    private Shape shape;
     public boolean contains(int x, int y) {
         if (shape == null ||
                 !shape.getBounds().equals(getBounds())) {

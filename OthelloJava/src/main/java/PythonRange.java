@@ -2,7 +2,6 @@ import java.io.*;
 import java.util.*;
 public class PythonRange implements Iterable<Integer> {
     private ArrayList<Integer> list = new ArrayList<Integer>();
-    private int pointer = 0;
     public PythonRange(int end) {
         this(0, end);
     }
