@@ -3,7 +3,6 @@ import java.util.*;
 public class OthelloGame {
     private static final String DEFAULT_BOARD = "---------------------------xo------ox---------------------------";
     public static final String DEFAULT_PLAY = "x";
-    public static final int DEFAULT_DEPTH = 2;
     public static final String MOVES = "xo";
     public static final ArrayList<Coordinate> NEIGHBORS = new ArrayList<Coordinate>(Arrays.asList(new Coordinate(-1, -1), new Coordinate(-1, 0), new Coordinate(-1, 1), new Coordinate(0, -1), new Coordinate(0, 1), new Coordinate(1, -1), new Coordinate(1, 0), new Coordinate(1, 1)));
     public String play, other;
@@ -12,7 +11,7 @@ public class OthelloGame {
     public Coordinate parentCoord;
     private String[][] board = new String[8][8];
     private String[][] origBoard = new String[8][8];
-    private int depth, xCount, oCount;
+    private int depth;
     private boolean orig;
     private ArrayList<OthelloGame> children = new ArrayList<OthelloGame>();
 
@@ -31,45 +30,51 @@ public class OthelloGame {
 
         }
         this.depth = depth;
-        if (orig) {
-            //    this.depth *= 2;
-        }
+        //    this.depth *= 2;
         this.play = play;
         this.other = MOVES.replace(play, "");
         this.orig = orig;
         this.parentCoord = parentCoord;
-        this.xCount = 64 - board.replace("x", "").length();
-        this.oCount = 64 - board.replace("o", "").length();
+        int xCount = 64 - board.replace("x", "").length();
+        int oCount = 64 - board.replace("o", "").length();
         this.scores.put("x", xCount);
         this.scores.put("o", oCount);
         this.bestMove.put("coord", parentCoord);
         this.bestMove.put("scores", scores);
         //System.out.println(depth + " " + play);
         //printBoard();
-        getBestMove();
+            getBestMove();
+
 
     }
-
+    public void printTree(){
+        System.out.println(depth);
+        printBoard();
+        for(OthelloGame g : children){
+            g.printTree();
+        }
+    }
     public static void main(String[] args) {
         //Max is 7
-        OthelloGame o = new OthelloGame(4);//"default", "default", 0, true, null);
-        o.playGame(100);
+        OthelloGame o = new OthelloGame(Integer.valueOf(args[0]));
+        //o.printBoard();
+        //o.printTree();
+        //OthelloGame o = new OthelloGame(4);//"default", "default", 0, true, null);
+        //o.playGame(100);
     }
 
     public static String stringifyBoard(String[][] board) {
-        String str = "";
+        StringBuilder str = new StringBuilder();
         for (int i = 7; i >= 0; i--) {
-            str += Arrays.toString(board[i]).replace(", ", "").replace("[", "").replace("]", "");
+            str.append(Arrays.toString(board[i]).replace(", ", "").replace("[", "").replace("]", ""));
         }
-        return str;
+        return str.toString();
     }
 
     public String[][] matrixCopy(String[][] a) {
         String[][] d = new String[8][8];
         for (int i = 0; i < 8; i++) {
-            for (int k = 0; k < 8; k++) {
-                d[i][k] = a[i][k];
-            }
+            System.arraycopy(a[i], 0, d[i], 0, 8);
         }
         return d;
     }
@@ -109,14 +114,6 @@ public class OthelloGame {
         }
         System.out.println("\n");
     }
-
-    public void printOrigBoard() {
-        for (int i = 0; i < 8; i++) {
-            System.out.println(Arrays.toString(origBoard[i]).replace(", ", " ").replace("[", "").replace("]", ""));
-        }
-        System.out.println("\n");
-    }
-
     public boolean isValidPlay(Coordinate coord) {
         int x = coord.x;
         int y = coord.y;
@@ -199,27 +196,25 @@ public class OthelloGame {
     }
 
     public void getBestMove() {
-        children = new ArrayList<OthelloGame>();
-        if (depth > 0) {
-            for (Coordinate coord : getPossiblePlays()) {
-                playMove(coord);
-                children.add(new OthelloGame(stringifyBoard(board), other, depth - 1, false, coord));
-                board = matrixCopy(origBoard);
-            }
-            if (depth > 1) {
-                if (children.size() > 0) {
-                    OthelloGame bm = Collections.max(children, myComparatorB.INSTANCE);
-                    bestMove.put("coord", bm.parentCoord);
-                    bestMove.put("scores", bm.bestMove.get("scores"));
+            children = new ArrayList<OthelloGame>();
+            if (depth > 0) {
+                for (Coordinate coord : getPossiblePlays()) {
+                    playMove(coord);
+                    children.add(new OthelloGame(stringifyBoard(board), other, depth - 1, false, coord));
+                    //children.add(new OthelloGame(stringifyBoard(board), other, depth - 1, false, coord));
+                    board = matrixCopy(origBoard);
                 }
-            } else {
-                if (children.size() > 0) {
-                    OthelloGame bm = Collections.max(children, myComparatorA.INSTANCE);
-                    bestMove.put("coord", bm.parentCoord);
-                    bestMove.put("scores", bm.bestMove.get("scores"));
+                //latch.await();
+                OthelloGame bm;
+                if (depth > 1) {
+                    bm = Collections.max(children, myComparatorB.INSTANCE);
+                } else {
+                    bm = Collections.max(children, myComparatorA.INSTANCE);
                 }
+                bestMove.put("coord", bm.parentCoord);
+                bestMove.put("scores", bm.bestMove.get("scores"));
             }
-        }
+
     }
 
     public void playMove() {
@@ -233,7 +228,6 @@ public class OthelloGame {
         int y = coord.y;
         board[y][x] = play;
         boolean[] otherFound = {false, false, false, false, false, false, false, false};
-        boolean[] terminatorFound = {false, false, false, false, false, false, false, false};
         HashSet<Coordinate> values = new HashSet<Coordinate>();
         HashSet<Coordinate> temp = new HashSet<Coordinate>();
         //Check ifchange
@@ -245,7 +239,6 @@ public class OthelloGame {
                 if (board[y][x1].equals(other)) {
                     otherFound[0] = true;
                 } else if (board[y][x1].equals(play) && otherFound[0]) {
-                    terminatorFound[0] = true;
                     values.addAll(temp);
 
                     break;
@@ -260,7 +253,7 @@ public class OthelloGame {
                 if (board[y][x1].equals(other)) {
                     otherFound[1] = true;
                 } else if (board[y][x1].equals(play) && otherFound[1]) {
-                    terminatorFound[1] = true;
+                    
                     values.addAll(temp);
 
                     break;
@@ -275,7 +268,7 @@ public class OthelloGame {
                 if (board[y1][x].equals(other)) {
                     otherFound[2] = true;
                 } else if (board[y1][x].equals(play) && otherFound[2]) {
-                    terminatorFound[2] = true;
+                    
                     values.addAll(temp);
 
                     break;
@@ -290,7 +283,7 @@ public class OthelloGame {
                 if (board[y1][x].equals(other)) {
                     otherFound[3] = true;
                 } else if (board[y1][x].equals(play) && otherFound[3]) {
-                    terminatorFound[3] = true;
+                    
                     values.addAll(temp);
 
                     break;
@@ -304,7 +297,7 @@ public class OthelloGame {
             if (board[y - inc][x + inc].equals(other)) {
                 otherFound[4] = true;
             } else if (board[y - inc][x + inc].equals(play) && otherFound[4]) {
-                terminatorFound[4] = true;
+                
                 values.addAll(temp);
 
                 break;
@@ -317,7 +310,7 @@ public class OthelloGame {
             if (board[y + inc][x - inc].equals(other)) {
                 otherFound[5] = true;
             } else if (board[y + inc][x - inc].equals(play) && otherFound[5]) {
-                terminatorFound[5] = true;
+                
                 values.addAll(temp);
 
                 break;
@@ -330,7 +323,7 @@ public class OthelloGame {
             if (board[y - inc][x - inc].equals(other)) {
                 otherFound[6] = true;
             } else if (board[y - inc][x - inc].equals(play) && otherFound[6]) {
-                terminatorFound[6] = true;
+                
                 values.addAll(temp);
 
                 break;
@@ -343,7 +336,7 @@ public class OthelloGame {
             if (board[y + inc][x + inc].equals(other)) {
                 otherFound[7] = true;
             } else if (board[y + inc][x + inc].equals(play) && otherFound[7]) {
-                terminatorFound[7] = true;
+                
                 values.addAll(temp);
 
                 break;
@@ -352,9 +345,7 @@ public class OthelloGame {
         for(Coordinate c : values){
             board[c.y][c.x] = play;
         }
-        if (orig) {
-            System.out.println(Arrays.toString(terminatorFound));
-        }
+        //System.out.println(Arrays.toString(
         if (player) {
             origBoard = matrixCopy(board);
         }
@@ -408,8 +399,11 @@ public class OthelloGame {
         //best move
         INSTANCE;
 
+        @SuppressWarnings("unchecked")
         public int compare(OthelloGame a, OthelloGame b) {
-            return ((HashMap<String, Integer>) a.bestMove.get("scores")).get(a.other) - ((HashMap<String, Integer>) b.bestMove.get("scores")).get(b.other);
+            int aScore = ((HashMap<String, Integer>) a.bestMove.get("scores")).get(a.other) - ((HashMap<String, Integer>) a.bestMove.get("scores")).get(a.play);
+            int bScore = ((HashMap<String, Integer>) b.bestMove.get("scores")).get(b.other) - ((HashMap<String, Integer>) b.bestMove.get("scores")).get(b.play);
+            return aScore - bScore;
         }
     }
 }

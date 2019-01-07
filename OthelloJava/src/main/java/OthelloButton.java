@@ -33,18 +33,12 @@ public class OthelloButton extends JButton implements ActionListener{
         //possibleValues.setAlignmentX(JLabel.CENTER_ALIGNMENT);
         //add(possibleValues);
         //setBorder(new RoundedBorder(10));
-        this.addKeyListener(new KeyAdapter (){
-            public void keyPressed(KeyEvent e) {
-                if(pressed){
 
-                }
-            }
-        });
         //setColor(Color.WHITE);
     }
     /**Deals with button press. */
     public void actionPerformed(ActionEvent e) {
-	if(owner == "-"){
+	if(owner.equals("-")){
 	    pressed = !pressed;
 	    parent.press(this);
 	}
@@ -81,10 +75,12 @@ public class OthelloButton extends JButton implements ActionListener{
     }
     public void flipToColor(String c){
         if(!c.equals("-")) {
+            System.out.println("flipping");
             owner = c;
-            repaint();
+            //repaint();
             //paintComponent();
         }
+        repaint();
     }
     public String getOwner(){
         return owner;

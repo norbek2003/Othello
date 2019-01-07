@@ -1,28 +1,26 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-public class Othello{
-    private JFrame frame = new JFrame();
-    private JSplitPane splitPane;
+
+public class Othello {
     //Deals with the grid
     private JPanel gridPanel = new JPanel();
     private JPanel gridContainer = new JPanel();
     private boolean pressable = false;
     private OthelloButton[][] grid = new OthelloButton[8][8];
-    //Control Panel
-    private JPanel controlSuper = new JPanel();
-    private JPanel control = new JPanel();
     private JLabel xScore = scoreDisplayer("x");
     private JLabel oScore = scoreDisplayer("o");
 
     //Othello Games
     private OthelloGame game;
-    public Othello(){
+
+    public Othello() {
+        JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         game = new OthelloGame(4);
         setupGrid();
         //control.setLayout()//new BoxLayout(control, BoxLayout.PAGE_AXIS));
+        JPanel control = new JPanel();
         control.setLayout(new GridBagLayout());
 
         GridBagConstraints c = new GridBagConstraints();
@@ -33,32 +31,44 @@ public class Othello{
         c.gridx = 0;
         c.gridy = 0;
         //control.add(generatorContainer, c);
-        c.gridy ++;
+        c.gridy++;
+        //Control Panel
+        JPanel controlSuper = new JPanel();
         controlSuper.add(control);
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, controlSuper, gridContainer);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, controlSuper, gridContainer);
         frame.getContentPane().add(splitPane);
         frame.pack();
         frame.setVisible(true);
     }
-    public static void main(String[] args){
+
+    public static void main(String[] args) {
         Othello s = new Othello();
+
     }
-    /** Deals with the pressing of the buttons on the Othello grid. */
-    public void press(OthelloButton b){
-        if(game.isValidPlay(b.coord)) {
-            System.out.println("Pressed");
-            game.playMove(b.coord, true);
-            game.printBoard();
-            game.printOrigBoard();
-            updateBoard();
-            System.out.println("Updated");
+
+    /**
+     * Deals with the pressing of the buttons on the Othello grid.
+     */
+    public void press(OthelloButton b) {
+        game.play = "x";
+        game.other = "o";
+        if (game.isValidPlay(b.coord)) {
+            if (game.isMovePossible()) {
+                System.out.println("Pressed");
+                game.playMove(b.coord, true);
+                game.printBoard();
+                updateBoard();
+                System.out.println("Updated");
+            } else {
+                //whoops
+            }
+
             game.play = "o";
             game.other = "x";
             game.getBestMove();
-            javax.swing.Timer timer = new javax.swing.Timer(3000, new ActionListener() {
 
-                @Override
-                public void actionPerformed(ActionEvent arg0) {
+            if (game.isMovePossible()) {
+                javax.swing.Timer timer = new javax.swing.Timer(1000, arg0 -> {
                     System.out.println("Last");
                     game.printBoard();
                     System.out.println("Thought of retaliation");
@@ -67,25 +77,25 @@ public class Othello{
                     game.printBoard();
                     updateBoard();
                     System.out.println("Updated");
-                    game.play = "x";
-                    game.other = "o";
-                }
-            });
-            timer.setRepeats(false);
-            timer.start();
+                });
+                timer.setRepeats(false);
+                timer.start();
+            } else {
 
-
+            }
         }
-
     }
 
-    /** Sets up the Othello grid.*/
-    private void setupGrid(){
+
+    /**
+     * Sets up the Othello grid.
+     */
+    private void setupGrid() {
         gridPanel.setLayout(new GridLayout(8, 8, 10, 10));
         gridPanel.setBackground(new Color(30, 60, 0));
-        for(int y = 0; y < 8; y++){
-            for(int x = 0; x < 8; x ++){
-                OthelloButton b = new OthelloButton(new Coordinate(x, y),this);
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                OthelloButton b = new OthelloButton(new Coordinate(x, y), this);
                 grid[y][x] = b;
                 gridPanel.add(b);
             }
@@ -117,12 +127,13 @@ public class Othello{
         */
         gridContainer.setPreferredSize(new Dimension(700, 700));
     }
-    private void updateBoard(){
+
+    private void updateBoard() {
         String[][] board = game.getBoard();
-        for(int y = 0; y < 8; y++){
-            for(int x = 0; x < 8; x++){
-                if(!board[y][x].equals(grid[y][x].getOwner())) {
-                    System.out.println(x + " " + y);
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                if (!board[y][x].equals(grid[y][x].getOwner())) {
+                    //System.out.println(x + " " + y);
                     //Checking for change saves a lot of time repaint GUI;
                     grid[y][x].flipToColor(board[y][x]);
                 }
@@ -131,8 +142,9 @@ public class Othello{
         oScore.setText(" " + game.getScore("o") + " ");
         xScore.setText(" " + game.getScore("x") + " ");
     }
-    private JLabel scoreDisplayer(String side){
-        JLabel label = new JLabel(" 2 "){
+
+    private JLabel scoreDisplayer(String side) {
+        JLabel label = new JLabel(" 2 ") {
             @Override
             public Dimension getMaximumSize() {
                 Dimension d = super.getMaximumSize();
@@ -143,7 +155,7 @@ public class Othello{
         label.setFont(new Font("Arial", Font.BOLD, 30));
         label.setBackground(Color.BLACK);
         label.setForeground(Color.WHITE);
-        if(side.equals("x")){
+        if (side.equals("x")) {
             label.setBackground(Color.WHITE);
             label.setForeground(Color.BLACK);
         }

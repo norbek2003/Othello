@@ -1,4 +1,3 @@
-import java.io.*;
 import java.util.*;
 public class PythonRange implements Iterable<Integer> {
     private ArrayList<Integer> list = new ArrayList<Integer>();
